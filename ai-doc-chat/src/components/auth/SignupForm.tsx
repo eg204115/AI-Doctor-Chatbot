@@ -18,10 +18,27 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
   const { signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("Hiii");
     e.preventDefault();
     
+    // Validation
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error('All fields are required');
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      toast.error('Please enter a valid email address');
       return;
     }
 
@@ -32,7 +49,16 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
       toast.success('Account created successfully!');
       onSuccess();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Signup failed');
+      console.error('Signup error:', error);
+      
+      // Handle different error responses
+      if (error.response?.data?.message) {
+        toast.error('Hiii',error.response.data.message);
+      } else if (error.message) {
+        toast.error('Hiii',error.message);
+      } else {
+        toast.error('Signup failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -53,6 +79,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
             onChange={(e) => setName(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
             required
+            disabled={isLoading}
           />
         </div>
         <div>
@@ -66,6 +93,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
             onChange={(e) => setEmail(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
             required
+            disabled={isLoading}
           />
         </div>
         <div>
@@ -79,6 +107,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
             required
+            disabled={isLoading}
+            minLength={6}
           />
         </div>
         <div>
@@ -92,12 +122,14 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
             required
+            disabled={isLoading}
+            minLength={6}
           />
         </div>
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
         >
           {isLoading ? 'Creating account...' : 'Sign up'}
         </button>
@@ -107,7 +139,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-blue-600 hover:text-blue-700 font-medium"
+          className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+          disabled={isLoading}
         >
           Login
         </button>
