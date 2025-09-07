@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (typeof window !== 'undefined') {
         localStorage.setItem('token', response.token);
       }
-      setUser(response.user);
+      // setUser(response.user);
       return response;
     } catch (error) {
       console.error('Signup failed:', error);

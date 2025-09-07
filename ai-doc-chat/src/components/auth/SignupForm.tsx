@@ -9,7 +9,7 @@ interface SignupFormProps {
   onSuccess: () => void;
 }
 
-export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSuccess }) => {
+export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,28 +17,30 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  if (password !== confirmPassword) {
-    toast.error('Passwords do not match');
-    return;
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  setIsLoading(true);
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
 
-  try {
-    await signup(email, password, name);
-    toast.success('Account created successfully!');
-    
-    // Instead of closing the modal, switch to login
-    onSwitchToLogin(); 
-  } catch (error: any) {
-    toast.error(error.response?.data?.message || 'Signup failed');
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+
+    try {
+      // 🔹 Create account without logging in
+      await signup(email, password, name);
+
+      toast.success('Account created successfully! Please log in.');
+      
+      // 🔹 Switch to login form
+      onSwitchToLogin();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Signup failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div>
