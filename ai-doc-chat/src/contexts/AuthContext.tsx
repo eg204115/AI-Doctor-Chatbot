@@ -11,12 +11,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetchUserData();
-    } else {
-      setIsLoading(false);
-    }
+    const initAuth = async () => {
+      if (typeof window === 'undefined') return;
+      
+      const token = localStorage.getItem('token');
+      if (token) {
+        await fetchUserData();
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
   const fetchUserData = async () => {
@@ -24,26 +30,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userData = await authAPI.getCurrentUser();
       setUser(userData);
     } catch (error) {
-      localStorage.removeItem('token');
+      console.error('Failed to fetch user data:', error);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const login = async (email: string, password: string) => {
-    const { user: userData, token } = await authAPI.login(email, password);
-    localStorage.setItem('token', token);
-    setUser(userData);
+    try {
+      const response = await authAPI.login(email, password);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', response.token);
+      }
+      setUser(response.user);
+      return response;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    const { user: userData, token } = await authAPI.signup(email, password, name);
-    localStorage.setItem('token', token);
-    setUser(userData);
+    try {
+      const response = await authAPI.signup(email, password, name);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', response.token);
+      }
+      setUser(response.user);
+      return response;
+    } catch (error) {
+      console.error('Signup failed:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+    }
     setUser(null);
   };
 
