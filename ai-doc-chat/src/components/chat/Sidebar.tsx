@@ -1,19 +1,23 @@
 'use client';
 
 import React from 'react';
-import { Plus, MessageSquare, Trash2 } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, LogOut } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const Sidebar: React.FC = () => {
   const { chats, currentChat, selectChat, createNewChat, deleteChat } = useChat();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
     }).format(new Date(date));
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -69,7 +73,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <div className="p-4 border-t border-gray-800">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
             {user?.name?.[0]?.toUpperCase() || 'U'}
           </div>
@@ -78,6 +82,15 @@ export const Sidebar: React.FC = () => {
             <p className="text-xs text-gray-400 truncate">{user?.email}</p>
           </div>
         </div>
+        
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-colors duration-200"
+        >
+          <LogOut size={16} />
+          <span className="text-sm">Logout</span>
+        </button>
       </div>
     </div>
   );
