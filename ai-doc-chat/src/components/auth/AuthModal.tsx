@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
@@ -11,12 +11,17 @@ interface AuthModalProps {
   initialMode?: 'login' | 'signup';
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  initialMode = 'login' 
+export const AuthModal: React.FC<AuthModalProps> = ({
+  isOpen,
+  onClose,
+  initialMode = 'login'
 }) => {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+
+  // ✅ Update mode whenever parent changes initialMode
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   if (!isOpen) return null;
 
@@ -29,17 +34,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         >
           <X size={24} />
         </button>
-        
+
         <div className="p-6">
           {mode === 'login' ? (
-            <LoginForm 
+            <LoginForm
               onSwitchToSignup={() => setMode('signup')}
               onSuccess={onClose}
             />
           ) : (
-            <SignupForm 
+            <SignupForm
               onSwitchToLogin={() => setMode('login')}
-              onSuccess={onClose}
+              onSuccess={() => setMode('login')} // signup success → switch to login
             />
           )}
         </div>

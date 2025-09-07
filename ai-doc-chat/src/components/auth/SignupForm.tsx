@@ -17,52 +17,28 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSucce
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    console.log("Hiii");
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  if (password !== confirmPassword) {
+    toast.error('Passwords do not match');
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    await signup(email, password, name);
+    toast.success('Account created successfully!');
     
-    // Validation
-    if (!name || !email || !password || !confirmPassword) {
-      toast.error('All fields are required');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-
-    if (!email.includes('@')) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      await signup(email, password, name);
-      toast.success('Account created successfully!');
-      onSuccess();
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      
-      // Handle different error responses
-      if (error.response?.data?.message) {
-        toast.error('Hiii',error.response.data.message);
-      } else if (error.message) {
-        toast.error('Hiii',error.message);
-      } else {
-        toast.error('Signup failed. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Instead of closing the modal, switch to login
+    onSwitchToLogin(); 
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || 'Signup failed');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div>
